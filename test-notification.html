@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { margin: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        .success { background: #67c23a; color: white; }
+        .warning { background: #e6a23c; color: white; }
+        .error { background: #f56c6c; color: white; }
+        .info { background: #909399; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Notification Test</h1>
+    <button class="success" onclick="showSuccess()">成功通知</button>
+    <button class="warning" onclick="showWarning()">警告通知</button>
+    <button class="error" onclick="showError()">错误通知</button>
+    <button class="info" onclick="showInfo()">信息通知</button>
+    <button onclick="showCustom()">自定义内容</button>
+    <button onclick="showAll()">显示所有</button>
+    <button onclick="closeAll()">关闭所有</button>
+
+    <script type="module">
+        import simpleNotification from './src/utils/simpleNotification.js';
+        
+        window.showSuccess = () => {
+            simpleNotification.success('操作成功完成！', '成功', 3000);
+        };
+        
+        window.showWarning = () => {
+            simpleNotification.warning('请注意这个警告！', '警告', 4000);
+        };
+        
+        window.showError = () => {
+            simpleNotification.error('操作失败，请重试！', '错误', 5000);
+        };
+        
+        window.showInfo = () => {
+            simpleNotification.info('这是一条信息通知', '信息', 3000);
+        };
+        
+        window.showCustom = () => {
+            simpleNotification.show({
+                type: 'success',
+                title: '自定义通知',
+                message: '这是自定义内容的消息',
+                duration: 0 // 不自动关闭
+            });
+        };
+        
+        window.showAll = () => {
+            simpleNotification.success('成功1！');
+            simpleNotification.warning('警告1！');
+            simpleNotification.error('错误1！');
+            simpleNotification.info('信息1！');
+        };
+        
+        window.closeAll = () => {
+            simpleNotification.closeAll();
+        };
+        
+        // 自动显示一个测试通知
+        simpleNotification.info('通知系统已加载！点击按钮测试功能', '测试', 2000);
+    </script>
+</body>
+</html>

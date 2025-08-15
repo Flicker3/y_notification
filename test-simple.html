@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue3 Notification 测试</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-success { background: #67c23a; color: white; }
+        .btn-warning { background: #e6a23c; color: white; }
+        .btn-error { background: #f56c6c; color: white; }
+        .btn-info { background: #909399; color: white; }
+        .data-demo {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9fafc;
+            border-left: 4px solid #409eff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="demo-container">
+            <h1>Vue3 Notification 测试</h1>
+            
+            <div class="data-demo">
+                <h3>基础通知测试</h3>
+                <button @click="showSuccess" class="btn btn-success">成功通知</button>
+                <button @click="showWarning" class="btn btn-warning">警告通知</button>
+                <button @click="showError" class="btn btn-error">错误通知</button>
+                <button @click="showInfo" class="btn btn-info">信息通知</button>
+            </div>
+
+            <div class="data-demo">
+                <h3>数据变化监控</h3>
+                <p>计数器: {{ counter }}</p>
+                <button @click="incrementCounter" class="btn btn-info">增加计数</button>
+                <button @click="decrementCounter" class="btn btn-warning">减少计数</button>
+            </div>
+
+            <div class="data-demo">
+                <h3>实时数据</h3>
+                <p>温度: {{ sensorData.temperature.toFixed(1) }}°C</p>
+                <p>湿度: {{ sensorData.humidity.toFixed(1) }}%</p>
+                <button @click="toggleSensor" class="btn">{{ sensorActive ? '停止' : '启动' }}传感器</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, watch } = Vue;
+
+        // 简化通知系统
+        class NotificationManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                const style = document.createElement('style');
+                style.textContent = `
+                    .notification-container {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 9999;
+                        pointer-events: none;
+                    }
+                    .notification {
+                        background: white;
+                        border-left: 4px solid #409eff;
+                        border-radius: 4px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        margin-bottom: 10px;
+                        padding: 16px;
+                        min-width: 300px;
+                        max-width: 400px;
+                        opacity: 0;
+                        transform: translateX(100%);
+                        transition: all 0.3s ease;
+                        pointer-events: auto;
+                        position: relative;
+                    }
+                    .notification.show {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                    .notification.success { border-left-color: #67c23a; background-color: #f0f9ff; }
+                    .notification.warning { border-left-color: #e6a23c; background-color: #fffbeb; }
+                    .notification.error { border-left-color: #f56c6c; background-color: #fef2f2; }
+                    .notification.info { border-left-color: #909399; background-color: #f4f4f5; }
+                    .notification-title { margin: 0 0 8px 0; font-size: 16px; font-weight: 500; color: #303133; }
+                    .notification-message { margin: 0; font-size: 14px; color: #606266; white-space: pre-line; }
+                    .notification-close { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 18px; color: #999; }
+                `;
+                document.head.appendChild(style);
+
+                this.container = document.createElement('div');
+                this.container.className = 'notification-container';
+                document.body.appendChild(this.container);
+            }
+
+            show(message, title = '', type = 'info', duration = 3000) {
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.innerHTML = `
+                    ${title ? `<div class="notification-title">${title}</div>` : ''}
+                    <div class="notification-message">${message}</div>
+                    <span class="notification-close" onclick="this.parentElement.remove()">×</span>
+                `;
+
+                this.container.appendChild(notification);
+
+                setTimeout(() => notification.classList.add('show'), 10);
+
+                if (duration > 0) {
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.classList.remove('show');
+                            setTimeout(() => notification.remove(), 300);
+                        }
+                    }, duration);
+                }
+
+                return notification;
+            }
+
+            success(message, title = '成功', duration = 3000) {
+                return this.show(message, title, 'success', duration);
+            }
+
+            warning(message, title = '警告', duration = 3000) {
+                return this.show(message, title, 'warning', duration);
+            }
+
+            error(message, title = '错误', duration = 3000) {
+                return this.show(message, title, 'error', duration);
+            }
+
+            info(message, title = '信息', duration = 3000) {
+                return this.show(message, title, 'info', duration);
+            }
+        }
+
+        const notification = new NotificationManager();
+
+        // 数据通知管理器
+        class DataNotificationManager {
+            constructor() {
+                this.notifications = new Map();
+            }
+
+            watch(dataRef, options = {}) {
+                const {
+                    title = '数据更新',
+                    duration = 3000,
+                    debounceTime = 1000,
+                    formatMessage = (newVal, oldVal) => `数据从 ${oldVal} 更新为 ${newVal}`
+                } = options;
+
+                let oldValue = dataRef.value;
+                let debounceTimer = null;
+                let activeNotification = null;
+
+                const updateNotification = (newVal) => {
+                    if (debounceTimer) clearTimeout(debounceTimer);
+                    
+                    debounceTimer = setTimeout(() => {
+                        const message = formatMessage(newVal, oldValue);
+                        
+                        if (activeNotification && activeNotification.parentElement) {
+                            // 更新现有通知
+                            const messageEl = activeNotification.querySelector('.notification-message');
+                            if (messageEl) messageEl.textContent = message;
+                        } else {
+                            // 创建新通知
+                            activeNotification = notification.show(message, title, 'info', duration);
+                        }
+                        
+                        oldValue = newVal;
+                    }, debounceTime);
+                };
+
+                return {
+                    update: updateNotification,
+                    close: () => {
+                        if (activeNotification && activeNotification.parentElement) {
+                            activeNotification.remove();
+                        }
+                    }
+                };
+            }
+        }
+
+        const dataNotification = new DataNotificationManager();
+
+        createApp({
+            setup() {
+                const counter = ref(0);
+                const sensorData = reactive({
+                    temperature: 25,
+                    humidity: 60
+                });
+                const sensorActive = ref(false);
+                let sensorInterval = null;
+
+                // 数据监控
+                const counterNotifier = dataNotification.watch(counter, {
+                    title: '计数器变化',
+                    formatMessage: (newVal, oldVal) => `计数器 ${newVal > oldVal ? '+' : ''}${newVal - oldVal}，当前值: ${newVal}`
+                });
+
+                const sensorNotifier = dataNotification.watch(sensorData, {
+                    title: '传感器数据',
+                    formatMessage: (newVal, oldVal) => `数据更新:
+温度: ${newVal.temperature.toFixed(1)}°C
+湿度: ${newVal.humidity.toFixed(1)}%`
+                });
+
+                const showSuccess = () => {
+                    notification.success('操作成功完成！', '成功');
+                };
+
+                const showWarning = () => {
+                    notification.warning('这是一个警告信息', '警告');
+                };
+
+                const showError = () => {
+                    notification.error('操作失败，请重试', '错误');
+                };
+
+                const showInfo = () => {
+                    notification.info('这是一条信息通知', '信息');
+                };
+
+                const incrementCounter = () => {
+                    counter.value += Math.floor(Math.random() * 5) + 1;
+                };
+
+                const decrementCounter = () => {
+                    counter.value -= Math.floor(Math.random() * 3) + 1;
+                };
+
+                const toggleSensor = () => {
+                    sensorActive.value = !sensorActive.value;
+                    if (sensorActive.value) {
+                        sensorInterval = setInterval(() => {
+                            sensorData.temperature = 20 + Math.random() * 15;
+                            sensorData.humidity = 40 + Math.random() * 40;
+                        }, 1000);
+                    } else {
+                        if (sensorInterval) {
+                            clearInterval(sensorInterval);
+                            sensorInterval = null;
+                        }
+                    }
+                };
+
+                return {
+                    counter,
+                    sensorData,
+                    sensorActive,
+                    showSuccess,
+                    showWarning,
+                    showError,
+                    showInfo,
+                    incrementCounter,
+                    decrementCounter,
+                    toggleSensor
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

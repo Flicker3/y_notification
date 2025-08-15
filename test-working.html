@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据变化通知测试 - 验证版本</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #409eff;
+            color: white;
+        }
+        button:hover { opacity: 0.8; }
+        .data-display {
+            padding: 10px;
+            background: #f0f9ff;
+            border-left: 3px solid #409eff;
+            margin: 10px 0;
+        }
+        .status {
+            font-weight: bold;
+            color: #409eff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>数据变化通知测试</h1>
+        
+        <div class="test-section">
+            <h3>测试说明</h3>
+            <p>这个测试验证以下功能：</p>
+            <ol>
+                <li>数据持续变化时，通知保持显示</li>
+                <li>通知内容实时更新，不重新创建</li>
+                <li>数据停止变化后，通知延时消失</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>计数器测试</h3>
+            <div class="data-display">
+                当前值: <span id="counter" class="status">0</span>
+            </div>
+            <button onclick="incrementCounter()">增加计数</button>
+            <button onclick="startAutoCounter()">启动自动计数</button>
+            <button onclick="stopAutoCounter()">停止自动计数</button>
+            <button onclick="resetCounter()">重置</button>
+        </div>
+
+        <div class="test-section">
+            <h3>实时数据测试</h3>
+            <div class="data-display">
+                温度: <span id="temperature" class="status">25.0</span>°C
+                <br>
+                湿度: <span id="humidity" class="status">60.0</span>%
+            </div>
+            <button onclick="startSensor()">启动传感器</button>
+            <button onclick="stopSensor()">停止传感器</button>
+        </div㱽iv>
+
+    </div>
+
+    <script>
+        // 简化通知系统
+        class TestNotification {
+            constructor() {
+                this.container = null;
+                this.activeNotification = null;
+                this.closeTimer = null;
+                this.init();
+            }
+
+            init() {
+                const style = document.createElement('style');
+                style.textContent = `
+                    .notification-container {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 9999;
+                        pointer-events: none;
+                    }
+                    .notification {
+                        background: white;
+                        border-left: 4px solid #409eff;
+                        border-radius: 4px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        margin-bottom: 10px;
+                        padding: 16px;
+                        min-width: 300px;
+                        max-width: 400px;
+                        opacity: 0;
+                        transform: translateX(100%);
+                        transition: all 0.3s ease;
+                        pointer-events: auto;
+                        position: relative;
+                    }
+                    .notification.show {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                    .notification-title { margin: 0 0 8px 0; font-size: 16px; font-weight: 500; color: #303133; }
+                    .notification-message { margin: 0; font-size: 14px; color: #606266; white-space: pre-line; }
+                    .notification-close { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 18px; color: #999; }
+                `;
+                document.head.appendChild(style);
+
+                this.container = document.createElement('div');
+                this.container.className = 'notification-container';
+                document.body.appendChild(this.container);
+            }
+
+            show(message, title = '', type = 'info') {
+                if (this.activeNotification && this.activeNotification.parentElement) {
+                    // 更新现有通知内容
+                    const messageEl = this.activeNotification.querySelector('.notification-message');
+                    if (messageEl) {
+                        messageEl.textContent = message;
+                        // 添加更新动画
+                        this.activeNotification.style.transform = 'translateX(0) scale(1.02)';
+                        setTimeout(() => {
+                            this.activeNotification.style.transform = 'translateX(0) scale(1)';
+                        }, 150);
+                    }
+                } else {
+                    // 创建新通知
+                    this.activeNotification = document.createElement('div');
+                    this.activeNotification.className = `notification notification-${type}`;
+                    this.activeNotification.innerHTML = `
+                        ${title ? `<div class="notification-title">${title}</div>` : ''}
+                        <div class="notification-message">${message}</div>
+                        <span class="notification-close" onclick="this.parentElement.remove()">×</span>
+                    `;
+
+                    this.container.appendChild(this.activeNotification);
+                    setTimeout(() => this.activeNotification.classList.add('show'), 10);
+                }
+
+                // 清除之前的关闭定时器
+                if (this.closeTimer) {
+                    clearTimeout(this.closeTimer);
+                }
+
+                // 设置新的关闭定时器（只有数据停止变化后才触发）
+                this.closeTimer = setTimeout(() => {
+                    if (this.activeNotification && this.activeNotification.parentElement) {
+                        this.activeNotification.classList.remove('show');
+                        setTimeout(() => {
+                            if (this.activeNotification && this.activeNotification.parentElement) {
+                                this.activeNotification.remove();
+                                this.activeNotification = null;
+                            }
+                        }, 300);
+                    }
+                }, 2000); // 2秒后关闭
+
+                return this.activeNotification;
+            }
+        }
+
+        const notification = new TestNotification();
+
+        // 数据监控
+        class DataMonitor {
+            constructor() {
+                this.data = { counter: 0, temperature: 25.0, humidity: 60.0 };
+                this.intervals = {};
+            }
+
+            watch(key, formatMessage, title = '数据更新') {
+                let oldValue = this.data[key];
+                let closeTimer = null;
+
+                const update = (newValue) => {
+                    // 清除之前的关闭定时器
+                    if (closeTimer) clearTimeout(closeTimer);
+
+                    const message = formatMessage(newValue, oldValue);
+                    notification.show(message, title);
+
+                    oldValue = newValue;
+
+                    // 设置新的关闭定时器
+                    if (closeTimer) clearTimeout(closeTimer);
+                    closeTimer = setTimeout(() => {
+                        // 通知会在2秒后自动关闭
+                        console.log(`数据 ${key} 停止变化，通知即将关闭`);
+                    }, 2000);
+                };
+
+                return { update };
+            }
+        }
+
+        const monitor = new DataMonitor();
+
+        // 设置监控
+        const counterMonitor = monitor.watch('counter', 
+            (newVal, oldVal) => {
+                const change = newVal - oldVal;
+                return `计数器 ${change > 0 ? '+' : ''}${change}，当前值: ${newVal}`;
+            }, 
+            '计数器变化'
+        );
+
+        const sensorMonitor = monitor.watch('temperature', 
+            (newVal, oldVal) => {
+                return `传感器数据更新:\n温度: ${newVal.toFixed(1)}°C\n湿度: ${monitor.data.humidity.toFixed(1)}%`;
+            }, 
+            '传感器数据'
+        );
+
+        // 测试功能
+        let counterInterval = null;
+        let sensorInterval = null;
+
+        function updateCounter() {
+            monitor.data.counter += Math.floor(Math.random() * 3) + 1;
+            document.getElementById('counter').textContent = monitor.data.counter;
+            counterMonitor.update(monitor.data.counter);
+        }
+
+        function updateSensor() {
+            monitor.data.temperature = 20 + Math.random() * 15;
+            monitor.data.humidity = 40 + Math.random() * 40;
+            document.getElementById('temperature').textContent = monitor.data.temperature.toFixed(1);
+            document.getElementById('humidity').textContent = monitor.data.humidity.toFixed(1);
+            sensorMonitor.update(monitor.data.temperature);
+        }
+
+        function incrementCounter() {
+            updateCounter();
+        }
+
+        function startAutoCounter() {
+            if (!counterInterval) {
+                counterInterval = setInterval(updateCounter, 800);
+            }
+        }
+
+        function stopAutoCounter() {
+            if (counterInterval) {
+                clearInterval(counterInterval);
+                counterInterval = null;
+            }
+        }
+
+        function resetCounter() {
+            monitor.data.counter = 0;
+            document.getElementById('counter').textContent = 0;
+            counterMonitor.update(0);
+        }
+
+        function startSensor() {
+            if (!sensorInterval) {
+                sensorInterval = setInterval(updateSensor, 1000);
+            }
+        }
+
+        function stopSensor() {
+            if (sensorInterval) {
+                clearInterval(sensorInterval);
+                sensorInterval = null;
+            }
+        }
+
+        // 初始显示
+        document.getElementById('counter').textContent = monitor.data.counter;
+        document.getElementById('temperature').textContent = monitor.data.temperature.toFixed(1);
+        document.getElementById('humidity').textContent = monitor.data.humidity.toFixed(1);
+
+        console.log('测试系统已启动');
+        console.log('1. 点击"启动自动计数" - 观察通知保持显示并更新内容');
+        console.log('2. 点击"停止自动计数" - 观察通知在2秒后消失');
+        console.log('3. 同样的逻辑适用于传感器数据');
+    </script>
+</body>
+</html>
