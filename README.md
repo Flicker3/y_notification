@@ -1,7 +1,7 @@
 # Vue3 Notification 组件
 
 一个功能强大的 Vue3 通知组件，支持方法调用、自定义内容、数据变化检测等高级功能。
-数据改变时，将自动刷新通知内容。支持 Vue2、Vue3 等多个版本。
+数据改变时，将自动刷新通知内容。
 <video controls src="./QQ2025815-175747.mp4" title="Title"></video>
 
 ## 功能特性
