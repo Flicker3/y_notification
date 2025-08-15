@@ -1,16 +1,18 @@
 # Vue3 Notification 组件
 
 一个功能强大的 Vue3 通知组件，支持方法调用、自定义内容、数据变化检测等高级功能。
+数据改变时，将自动刷新通知内容。支持 Vue2、Vue3 等多个版本。
+<video controls src="QQ2025815-175747.mp4" title="Title"></video>
 
 ## 功能特性
 
 - ✅ **方法调用**: 支持通过全局方法调用，无需组件嵌套
-- ✅ **自定义内容**: 支持HTML字符串、Vue组件、函数等多种内容形式
+- ✅ **自定义内容**: 支持 HTML 字符串、Vue 组件、函数等多种内容形式
 - ✅ **数据变化检测**: 当数据变化时自动重置计时器
-- ✅ **类型丰富**: 内置success、warning、error、info四种类型
+- ✅ **类型丰富**: 内置 success、warning、error、info 四种类型
 - ✅ **响应式设计**: 支持移动端适配
-- ✅ **TypeScript**: 完整的TypeScript支持
-- ✅ **可组合**: 提供Composition API支持
+- ✅ **TypeScript**: 完整的 TypeScript 支持
+- ✅ **可组合**: 提供 Composition API 支持
 
 ## 快速开始
 
@@ -27,38 +29,38 @@ npm run dev
 
 ```typescript
 // 在任何组件中直接使用
-this.$notification.success('操作成功！');
-this.$notification.error('操作失败！');
-this.$notification.warning('警告信息');
-this.$notification.info('提示信息');
+this.$notification.success("操作成功！");
+this.$notification.error("操作失败！");
+this.$notification.warning("警告信息");
+this.$notification.info("提示信息");
 
 // 自定义配置
 this.$notification.show({
-  type: 'success',
-  title: '成功',
-  message: '操作已完成',
+  type: "success",
+  title: "成功",
+  message: "操作已完成",
   duration: 3000
 });
 ```
 
-#### 使用Composition API
+#### 使用 Composition API
 
 ```typescript
-import { useNotificationManager } from '@/composables/useNotification';
+import { useNotificationManager } from "@/composables/useNotification";
 
 const notification = useNotificationManager();
 
-notification.success('成功消息');
-notification.error('错误消息');
+notification.success("成功消息");
+notification.error("错误消息");
 ```
 
 ### 3. 自定义内容
 
-#### HTML内容
+#### HTML 内容
 
 ```typescript
 notification.show({
-  type: 'info',
+  type: "info",
   duration: 0, // 不自动关闭
   content: () => `
     <div>
@@ -69,7 +71,7 @@ notification.show({
 });
 ```
 
-#### Vue组件内容
+#### Vue 组件内容
 
 ```typescript
 const CustomComponent = {
@@ -81,13 +83,13 @@ const CustomComponent = {
   `,
   methods: {
     handleClick() {
-      alert('组件内事件触发！');
+      alert("组件内事件触发！");
     }
   }
 };
 
 notification.show({
-  type: 'success',
+  type: "success",
   content: CustomComponent
 });
 ```
@@ -97,15 +99,15 @@ notification.show({
 #### 使用可观察通知
 
 ```typescript
-import { ref } from 'vue';
-import { useObservableNotification } from '@/composables/useNotification';
+import { ref } from "vue";
+import { useObservableNotification } from "@/composables/useNotification";
 
 const counter = ref(0);
 
 // 创建可观察通知，当counter变化时自动更新
 const { notificationId, close } = useObservableNotification(counter, {
-  type: 'info',
-  title: '计数器变化',
+  type: "info",
+  title: "计数器变化",
   duration: 5000
 });
 
@@ -115,39 +117,39 @@ const increment = () => {
 };
 ```
 
-#### 使用自定义Hook
+#### 使用自定义 Hook
 
 ```typescript
-import { reactive } from 'vue';
-import { useNotification } from '@/composables/useNotification';
+import { reactive } from "vue";
+import { useNotification } from "@/composables/useNotification";
 
 const userData = reactive({
-  name: '张三',
+  name: "张三",
   age: 25
 });
 
 const { show, close, update } = useNotification(
   userData,
   {
-    type: 'success',
-    title: '用户信息',
+    type: "success",
+    title: "用户信息",
     duration: 4000,
     watchData: true, // 监听数据变化
     resetTimerOnChange: true // 数据变化时重置计时器
   },
   (newData, oldData) => {
-    console.log('数据已更新:', newData, oldData);
+    console.log("数据已更新:", newData, oldData);
   }
 );
 ```
 
-## API参考
+## API 参考
 
 ### 通知选项
 
 ```typescript
 interface NotificationOptions {
-  type?: 'success' | 'warning' | 'error' | 'info'; // 通知类型
+  type?: "success" | "warning" | "error" | "info"; // 通知类型
   title?: string; // 标题
   message?: string; // 消息内容
   duration?: number; // 持续时间(ms)，0表示不自动关闭
@@ -160,24 +162,24 @@ interface NotificationOptions {
 
 ### 方法列表
 
-| 方法 | 参数 | 说明 |
-|------|------|------|
-| `show(options)` | `NotificationOptions` | 显示通知 |
-| `success(message, title?, duration?)` | `string, string?, number?` | 成功通知 |
-| `warning(message, title?, duration?)` | `string, string?, number?` | 警告通知 |
-| `error(message, title?, duration?)` | `string, string?, number?` | 错误通知 |
-| `info(message, title?, duration?)` | `string, string?, number?` | 信息通知 |
-| `close(key)` | `string` | 关闭指定通知 |
-| `closeAll()` | - | 关闭所有通知 |
-| `update(key, options)` | `string, Partial<NotificationOptions>` | 更新通知 |
-| `remove(key)` | `string` | 移除通知 |
+| 方法                                  | 参数                                   | 说明         |
+| ------------------------------------- | -------------------------------------- | ------------ |
+| `show(options)`                       | `NotificationOptions`                  | 显示通知     |
+| `success(message, title?, duration?)` | `string, string?, number?`             | 成功通知     |
+| `warning(message, title?, duration?)` | `string, string?, number?`             | 警告通知     |
+| `error(message, title?, duration?)`   | `string, string?, number?`             | 错误通知     |
+| `info(message, title?, duration?)`    | `string, string?, number?`             | 信息通知     |
+| `close(key)`                          | `string`                               | 关闭指定通知 |
+| `closeAll()`                          | -                                      | 关闭所有通知 |
+| `update(key, options)`                | `string, Partial<NotificationOptions>` | 更新通知     |
+| `remove(key)`                         | `string`                               | 移除通知     |
 
 ### Composables
 
 #### useNotification
 
 ```typescript
-import { useNotification } from '@/composables/useNotification';
+import { useNotification } from "@/composables/useNotification";
 
 const { show, close, update, notificationId } = useNotification(
   data,
@@ -189,7 +191,7 @@ const { show, close, update, notificationId } = useNotification(
 #### useObservableNotification
 
 ```typescript
-import { useObservableNotification } from '@/composables/useNotification';
+import { useObservableNotification } from "@/composables/useNotification";
 
 const { notificationId, close } = useObservableNotification(data, options);
 ```
@@ -197,7 +199,7 @@ const { notificationId, close } = useObservableNotification(data, options);
 #### useNotificationManager
 
 ```typescript
-import { useNotificationManager } from '@/composables/useNotification';
+import { useNotificationManager } from "@/composables/useNotification";
 
 const notification = useNotificationManager();
 ```
@@ -229,7 +231,7 @@ src/
 
 ### 样式定制
 
-可以通过覆盖CSS变量来自定义主题：
+可以通过覆盖 CSS 变量来自定义主题：
 
 ```css
 .notification.success {
