@@ -1,35 +1,56 @@
 <template>
   <transition name="notification">
-    <div v-if="visible" class="notification" :class="[options.type, `notification-${options.type}`]">
+    <div
+      v-if="visible"
+      class="notification"
+      :class="[options.type, `notification-${options.type}`]"
+    >
       <div class="notification-content">
         <!-- 自定义内容插槽 -->
         <div v-if="options.content" class="notification-custom">
-          <component v-if="isVueComponent(options.content)" :is="options.content" v-bind="options.props" />
-          <div v-else-if="typeof options.content === 'function'" v-html="options.content()"></div>
+          <component
+            v-if="isVueComponent(options.content)"
+            :is="options.content"
+            v-bind="options.props"
+          />
+          <div
+            v-else-if="typeof options.content === 'function'"
+            v-html="options.content()"
+          ></div>
           <div v-else v-html="options.content"></div>
         </div>
-        
+
         <!-- 默认内容 -->
         <div v-else>
-          <h4 v-if="options.title" class="notification-title">{{ options.title }}</h4>
-          <p v-if="options.message" class="notification-message">{{ options.message }}</p>
+          <h4 v-if="options.title" class="notification-title">
+            {{ options.title }}
+          </h4>
+          <p v-if="options.message" class="notification-message">
+            {{ options.message }}
+          </p>
         </div>
       </div>
-      
-      <button v-if="options.closable !== false" class="close-btn" @click="close">×</button>
+
+      <button
+        v-if="options.closable !== false"
+        class="close-btn"
+        @click="close"
+      >
+        ×
+      </button>
     </div>
   </transition>
 </template>
 
 <script setup lang="ts">
-import { ref, defineComponent, getCurrentInstance } from 'vue';
-import type { NotificationOptions } from './index';
+import { ref, defineComponent, getCurrentInstance } from "vue";
+import type { NotificationOptions } from "./index";
 
 const visible = ref(false);
 const options = ref<NotificationOptions>({
-  type: 'info',
-  title: '',
-  message: '',
+  type: "info",
+  title: "",
+  message: "",
   duration: 3000,
   closable: true
 });
@@ -38,7 +59,7 @@ let timer: ReturnType<typeof setTimeout>;
 let closeTimer: ReturnType<typeof setTimeout>;
 
 const isVueComponent = (content: any): boolean => {
-  return typeof content === 'object' && content !== null && content.__file;
+  return typeof content === "object" && content !== null && content.__file;
 };
 
 const close = () => {
@@ -51,11 +72,11 @@ const close = () => {
 const show = (config: NotificationOptions) => {
   options.value = { ...options.value, ...config };
   visible.value = true;
-  
+
   // 清除之前的定时器
   if (timer) clearTimeout(timer);
   if (closeTimer) clearTimeout(closeTimer);
-  
+
   // 如果设置了持续时间，自动关闭
   if (options.value.duration && options.value.duration > 0) {
     timer = setTimeout(close, options.value.duration);
@@ -64,7 +85,7 @@ const show = (config: NotificationOptions) => {
 
 const update = (newOptions: Partial<NotificationOptions>) => {
   options.value = { ...options.value, ...newOptions };
-  
+
   // 重置计时器
   if (timer) {
     clearTimeout(timer);
