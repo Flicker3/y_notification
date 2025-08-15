@@ -3,7 +3,7 @@
 一个功能强大的 Vue3 通知组件，支持方法调用、自定义内容、数据变化检测等高级功能。
 
 数据改变时，将自动刷新通知内容。
-<img src="./fhzhw-xbxqd.gif" width="350" style="box-shadow: 0 0 5px 2px #ccc; display: block;">
+<img src="./fhzhw-xbxqd.gif" width="100%" style="box-shadow: 0 0 5px 2px #ccc; display: block;">
 
 ## 功能特性
 
