@@ -52,11 +52,11 @@ const options = ref<NotificationOptions>({
   title: "",
   message: "",
   duration: 3000,
-  closable: true
+  closable: true,
 });
 
 let timer: ReturnType<typeof setTimeout>;
-let closeTimer: ReturnType<typeof setTimeout>;
+let closeTimer: ReturnType<typeof setTimeout> | null = null;
 
 const isVueComponent = (content: any): boolean => {
   return typeof content === "object" && content !== null && content.__file;
@@ -109,7 +109,7 @@ defineExpose({
   show,
   close,
   update,
-  resetTimer
+  resetTimer,
 });
 </script>
 

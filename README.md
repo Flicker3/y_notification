@@ -5,6 +5,10 @@
 数据改变时，将自动刷新通知内容。
 <img src="./fhzhw-xbxqd.gif" width="100%" style="box-shadow: 0 0 5px 2px #ccc; display: block;">
 
+# 在线体验
+
+https://flicker3.github.io/
+
 ## 功能特性
 
 - ✅ **方法调用**: 支持通过全局方法调用，无需组件嵌套
@@ -40,7 +44,7 @@ this.$notification.show({
   type: "success",
   title: "成功",
   message: "操作已完成",
-  duration: 3000
+  duration: 3000,
 });
 ```
 
@@ -68,7 +72,7 @@ notification.show({
       <h3>自定义标题</h3>
       <p>这是自定义的HTML内容</p>
     </div>
-  `
+  `,
 });
 ```
 
@@ -85,13 +89,13 @@ const CustomComponent = {
   methods: {
     handleClick() {
       alert("组件内事件触发！");
-    }
-  }
+    },
+  },
 };
 
 notification.show({
   type: "success",
-  content: CustomComponent
+  content: CustomComponent,
 });
 ```
 
@@ -109,7 +113,7 @@ const counter = ref(0);
 const { notificationId, close } = useObservableNotification(counter, {
   type: "info",
   title: "计数器变化",
-  duration: 5000
+  duration: 5000,
 });
 
 // 增加计数器会触发通知更新
@@ -126,7 +130,7 @@ import { useNotification } from "@/composables/useNotification";
 
 const userData = reactive({
   name: "张三",
-  age: 25
+  age: 25,
 });
 
 const { show, close, update } = useNotification(
@@ -136,7 +140,7 @@ const { show, close, update } = useNotification(
     title: "用户信息",
     duration: 4000,
     watchData: true, // 监听数据变化
-    resetTimerOnChange: true // 数据变化时重置计时器
+    resetTimerOnChange: true, // 数据变化时重置计时器
   },
   (newData, oldData) => {
     console.log("数据已更新:", newData, oldData);

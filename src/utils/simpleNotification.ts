@@ -1,5 +1,4 @@
 // 简化版本的通知系统
-import { createApp, h } from 'vue';
 
 interface NotificationOptions {
   type?: 'success' | 'warning' | 'error' | 'info';

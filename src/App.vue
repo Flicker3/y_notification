@@ -151,13 +151,10 @@ const notification = new SimpleNotification();
 
 // ===== 数据通知管理器 =====
 class DataNotificationManager {
-  private notifications = new Map();
-
   watch(dataRef: any, options: any = {}) {
     const {
       title = "数据更新",
       duration = 3000,
-      debounceTime = 1000,
       formatMessage = (newVal: any, oldVal: any) =>
         `数据从 ${oldVal} 更新为 ${newVal}`,
     } = options;
@@ -270,7 +267,7 @@ const userWatcher = dataNotification.watch(user, {
 const sensorWatcher = dataNotification.watch(sensorData, {
   title: "传感器数据",
   debounceTime: 1500,
-  formatMessage: (newVal: any, oldVal: any) => {
+  formatMessage: (newVal: any) => {
     return `数据更新:\n温度: ${newVal.temperature.toFixed(
       1
     )}°C\n湿度: ${newVal.humidity.toFixed(1)}%`;

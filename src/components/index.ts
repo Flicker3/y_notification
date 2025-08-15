@@ -7,6 +7,7 @@ export interface NotificationOptions {
   key?: string;
   closable?: boolean;
   onClose?: () => void;
+  props?: Record<string, any>;
 }
 
 export interface NotificationInstance {

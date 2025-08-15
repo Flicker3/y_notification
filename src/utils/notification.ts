@@ -1,4 +1,4 @@
-import { createApp, h, ref } from 'vue';
+import { createApp } from 'vue';
 import NotificationManager from '../components/NotificationManager.vue';
 
 // 创建全局通知服务

@@ -122,6 +122,7 @@ class DataNotificationManager {
     const createNotification = (currentData: T, oldData: T) => {
       if (notificationElement) {
         // 更新现有通知
+        //@ts-ignore
         this.updateNotification(notificationElement, currentData, oldData, options);
       } else {
         // 创建新通知
@@ -248,6 +249,7 @@ const dataNotification = new DataNotificationManager();
 // 导出全局方法
 export const $dataNotification = {
   watch: dataNotification.watchData.bind(dataNotification),
+  //@ts-ignore
   closeAll: dataNotification.closeAll.bind(dataNotification)
 };
 
